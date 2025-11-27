@@ -78,6 +78,11 @@ This project includes a GitHub Actions workflow that:
 - `rendered-video` - The final MP4 animation (30 day retention)
 - `generated-script` - The Python script for Blender (7 day retention)
 
+**Automated Issue Creation**:
+- If the CI fails, a GitHub issue is automatically created
+- Issues include failure details, investigation steps, and direct links to logs
+- Prevents duplicate issues for the same workflow and branch
+
 To enable the CI pipeline, push the code to GitHub and the workflow will run automatically on push/PR to main/master branches.
 
 ## What Happens

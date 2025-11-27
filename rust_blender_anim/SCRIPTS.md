@@ -79,6 +79,32 @@ The workflow runs automatically on:
 3. Scroll to the "Artifacts" section at the bottom
 4. Download `rendered-video` to get the MP4 file
 
+### Auto-Issue on Failure Workflow
+
+This project includes an automated issue creation system (`.github/workflows/auto-issue-on-failure.yml`) that:
+
+**Triggers when**: The CI Pipeline workflow fails
+
+**Actions taken**:
+1. Extracts failure information (workflow name, run number, branch, commit)
+2. Checks for existing open issues with the same workflow and branch
+3. Either:
+   - Creates a new issue with the `ci-failure`, `bug`, and `automated` labels
+   - Or adds a comment to an existing issue if one already exists
+
+**Issue includes**:
+- 🚨 Descriptive title: `🔴 CI Failure: [Workflow] #[Run] on [Branch]`
+- 📊 Details table with workflow info, run number, commit SHA, and actor
+- 🔗 Direct link to the failed workflow run
+- 🔍 Investigation steps and common failure points
+- 📋 Checklist for fixing and closing the issue
+
+**Benefits**:
+- ✅ Automatic tracking of CI failures
+- ✅ No duplicate issues for the same workflow/branch
+- ✅ Clear, actionable investigation steps
+- ✅ Links to relevant runs and commits
+
 ### Local Simulation
 
 To simulate the CI pipeline locally:
