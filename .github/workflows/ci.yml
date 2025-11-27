@@ -1,0 +1,144 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  health-checks:
+    name: Health Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/registry
+        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Cache cargo index
+      uses: actions/cache@v3
+      with:
+        path: ~/.cargo/git
+        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Cache cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Run health checks
+      run: |
+        cd rust_blender_anim
+        chmod +x health_check.sh
+        ./health_check.sh
+    
+    - name: Run Clippy
+      run: |
+        cd rust_blender_anim
+        cargo clippy -- -D warnings
+    
+    - name: Run tests
+      run: |
+        cd rust_blender_anim
+        cargo test --verbose
+
+  build-and-render:
+    name: Build and Render Video
+    needs: health-checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        override: true
+    
+    - name: Cache cargo build
+      uses: actions/cache@v3
+      with:
+        path: target
+        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('rust_blender_anim/Cargo.lock') }}
+    
+    - name: Install Blender
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget xz-utils
+        
+        # Download Blender 3.6 LTS
+        wget -q https://download.blender.org/release/Blender3.6/blender-3.6.15-linux-x64.tar.xz
+        tar -xf blender-3.6.15-linux-x64.tar.xz
+        
+        # Add to PATH
+        echo "$(pwd)/blender-3.6.15-linux-x64" >> $GITHUB_PATH
+        
+        # Verify installation
+        ./blender-3.6.15-linux-x64/blender --version
+    
+    - name: Build Rust application
+      run: |
+        cd rust_blender_anim
+        cargo build --release
+    
+    - name: Generate Python script
+      run: |
+        cd rust_blender_anim
+        cargo run --release
+    
+    - name: Render video with Blender
+      run: |
+        cd rust_blender_anim
+        ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -a
+    
+    - name: Find and rename output
+      run: |
+        cd rust_blender_anim
+        # Blender may output as render_output0001-0060.mp4 or similar
+        if ls render_output*.mp4 1> /dev/null 2>&1; then
+          # Get the first match
+          OUTPUT_FILE=$(ls render_output*.mp4 | head -n 1)
+          echo "Found output: $OUTPUT_FILE"
+          
+          # Copy to a standard name for artifact
+          cp "$OUTPUT_FILE" animation_output.mp4
+          ls -lh animation_output.mp4
+        else
+          echo "Error: No video output found!"
+          exit 1
+        fi
+    
+    - name: Upload video artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: rendered-video
+        path: rust_blender_anim/animation_output.mp4
+        retention-days: 30
+    
+    - name: Upload generated script
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-script
+        path: rust_blender_anim/generated_script.py
+        retention-days: 7
