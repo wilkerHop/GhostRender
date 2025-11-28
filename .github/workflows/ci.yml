@@ -77,7 +77,7 @@ jobs:
     - name: Install Blender
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget xz-utils libxi6 libxrender1 libgl1-mesa-glx libgl1-mesa-dri libxxf86vm1 libxfixes3 libxkbcommon-x11-0 libsm6
+        sudo apt-get install -y wget xz-utils libxi6 libxrender1 libgl1 libgl1-mesa-dri libxxf86vm1 libxfixes3 libxkbcommon-x11-0 libsm6 libx11-6 libxext6
         
         # Download Blender 3.6 LTS
         wget -q https://download.blender.org/release/Blender3.6/blender-3.6.15-linux-x64.tar.xz
