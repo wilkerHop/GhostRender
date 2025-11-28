@@ -77,7 +77,7 @@ jobs:
     - name: Install Blender
       run: |
         sudo apt-get update
-        sudo apt-get install -y wget xz-utils libxi6 libxrender1 libgl1 libgl1-mesa-dri libxxf86vm1 libxfixes3 libxkbcommon-x11-0 libsm6 libx11-6 libxext6
+        sudo apt-get install -y wget xz-utils libxi6 libxrender1 libgl1 libgl1-mesa-dri libxxf86vm1 libxfixes3 libxkbcommon-x11-0 libsm6 libx11-6 libxext6 xvfb
         
         # Download Blender 3.6 LTS
         wget -q https://download.blender.org/release/Blender3.6/blender-3.6.15-linux-x64.tar.xz
@@ -102,7 +102,8 @@ jobs:
     - name: Render video with Blender
       run: |
         cd rust_blender_anim
-        ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -a
+        export LIBGL_ALWAYS_SOFTWARE=1
+        xvfb-run -a ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -a
     
     - name: Find and rename output
       run: |
