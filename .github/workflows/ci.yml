@@ -104,14 +104,16 @@ jobs:
       uses: actions/cache@v3
       with:
         path: rust_blender_anim/animation_output.mp4
-        key: video-artifact-${{ runner.os }}-${{ hashFiles('rust_blender_anim/generated_script.py') }}
+        # Updated cache key to include src/ changes as logic (and audio) changed
+        key: video-artifact-v2-${{ runner.os }}-${{ hashFiles('rust_blender_anim/generated_script.py') }}-${{ hashFiles('rust_blender_anim/src/**/*.rs') }}
 
     - name: Render video with Blender
       if: steps.video-cache.outputs.cache-hit != 'true'
       run: |
         cd rust_blender_anim
         export LIBGL_ALWAYS_SOFTWARE=1
-        xvfb-run -a ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -noaudio -a
+        # Removed -noaudio flag to enable sound rendering
+        xvfb-run -a ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -a
     
     - name: Find and rename output
       if: steps.video-cache.outputs.cache-hit != 'true'
