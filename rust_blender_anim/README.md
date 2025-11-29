@@ -1,4 +1,4 @@
-# Rust + Blender Video Generation PoC
+# Rust + Blender Video Generation PoC 
 
 A proof-of-concept application demonstrating how to use Rust for high-performance calculations and Blender for video rendering.
 
