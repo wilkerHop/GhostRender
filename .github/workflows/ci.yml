@@ -94,42 +94,34 @@ jobs:
         cd rust_blender_anim
         cargo build --release
     
-    - name: Generate Python script
-      run: |
-        cd rust_blender_anim
-        cargo run --release
-    
     - name: Cache rendered video
       id: video-cache
       uses: actions/cache@v3
       with:
         path: rust_blender_anim/animation_output.mp4
-        # Updated cache key to include src/ changes as logic (and audio) changed
-        key: video-artifact-v2-${{ runner.os }}-${{ hashFiles('rust_blender_anim/generated_script.py') }}-${{ hashFiles('rust_blender_anim/src/**/*.rs') }}
+        # Updated cache key to depend on Rust source and Cargo files
+        key: video-artifact-v3-${{ runner.os }}-${{ hashFiles('rust_blender_anim/src/**/*.rs') }}-${{ hashFiles('rust_blender_anim/Cargo.lock') }}
 
-    - name: Render video with Blender
+    - name: Render video with Rust Pipeline
       if: steps.video-cache.outputs.cache-hit != 'true'
       run: |
         cd rust_blender_anim
         export LIBGL_ALWAYS_SOFTWARE=1
-        # Removed -noaudio flag to enable sound rendering
-        xvfb-run -a ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -a
+        # Add Blender to PATH so Rust can find it
+        export PATH=$PATH:$(pwd)/../blender-3.6.15-linux-x64
+        
+        # Run the Rust binary (which manages parallel rendering)
+        xvfb-run -a cargo run --release
     
-    - name: Find and rename output
+    - name: Verify output
       if: steps.video-cache.outputs.cache-hit != 'true'
       run: |
         cd rust_blender_anim
-        # Blender may output as render_output0001-0060.mp4 or similar
-        if ls render_output*.mp4 1> /dev/null 2>&1; then
-          # Get the first match
-          OUTPUT_FILE=$(ls render_output*.mp4 | head -n 1)
-          echo "Found output: $OUTPUT_FILE"
-          
-          # Copy to a standard name for artifact
-          cp "$OUTPUT_FILE" animation_output.mp4
+        if [ -f "animation_output.mp4" ]; then
+          echo "✅ Video rendered successfully: animation_output.mp4"
           ls -lh animation_output.mp4
         else
-          echo "Error: No video output found!"
+          echo "❌ Error: animation_output.mp4 not found!"
           exit 1
         fi
     
@@ -144,7 +136,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: generated-script
-        path: rust_blender_anim/generated_script.py
+        path: rust_blender_anim/setup_scene.py
         retention-days: 7
 
   deploy-pages:
