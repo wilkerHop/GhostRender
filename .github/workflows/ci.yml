@@ -157,7 +157,6 @@ jobs:
 
     - name: Rename video for website
       run: |
-        mv website/animation_output.mp4 website/animation_output.mp4
         ls -lh website/
 
     - name: Deploy to GitHub Pages
