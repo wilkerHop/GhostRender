@@ -6,13 +6,13 @@ mod audio;
 mod scene;
 
 // Configuration for our animation
-const FRAMES: i32 = 60;
+const FRAMES: i32 = 1800; // 30 seconds at 60 FPS
 const OUTPUT_FILENAME: &str = "generated_script.py";
 const RENDER_OUTPUT: &str = "//render_output"; // Blender relative path
 
 fn main() -> std::io::Result<()> {
     println!("Generating audio...");
-    audio::generate_audio("audio.wav", 10)?; // 10 seconds of audio
+    audio::generate_audio("audio.wav", 30)?; // 30 seconds of audio
     println!("Audio generated: audio.wav");
 
     println!("🦀 Rust is calculating animation data...");
@@ -26,7 +26,8 @@ bpy.ops.object.select_all(action='DESELECT')
 bpy.ops.object.select_by_type(type='MESH')
 bpy.ops.object.delete()
 
-# Set end frame
+# Set end frame and FPS
+bpy.context.scene.render.fps = 60
 bpy.context.scene.frame_end = "#);
     script.push_str(&format!("{}\n", FRAMES));
 
@@ -144,7 +145,9 @@ const.track_axis = 'TRACK_NEGATIVE_Z'
 const.up_axis = 'UP_Y'
 
 # Animate Camera following
-for frame in range(0, 61):
+for frame in range(0, "#);
+    script.push_str(&format!("{}", FRAMES + 1));
+    script.push_str(r#"):
     y_pos = -(frame * 0.1) + 8 # Keep distance
     camera_object.location = (5, y_pos, 3)
     camera_object.keyframe_insert(data_path='location', frame=frame)

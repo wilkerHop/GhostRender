@@ -47,10 +47,12 @@ pub struct Keyframe {
     pub rotation: Option<Vector3>,
 }
 
-pub fn calculate_walk_cycle(frame: i32, total_frames: i32) -> Vec<Object> {
-    let t = frame as f32 / total_frames as f32;
-    let walk_speed = 4.0 * PI; // 2 cycles per animation
-    let phase = t * walk_speed;
+pub fn calculate_walk_cycle(frame: i32, _total_frames: i32) -> Vec<Object> {
+    // 120 BPM = 2 beats/sec.
+    // At 60 FPS, 1 beat = 30 frames.
+    // A full walk cycle (left step + right step) = 2 beats = 60 frames.
+    // So we want phase to go 0..2PI every 60 frames.
+    let phase = frame as f32 * (2.0 * PI / 60.0);
 
     let mut objects = Vec::new();
 
