@@ -17,11 +17,11 @@ pub fn generate_audio(filename: &str, duration_secs: u32) -> std::io::Result<()>
 
     // WAV Header
     write!(writer, "RIFF")?;
-    write!(writer, "{:4}", (36 + total_samples * 2) as u32)?; // ChunkSize
+    write!(writer, "{:4}", (36 + total_samples * 2))?; // ChunkSize
     write!(writer, "WAVE")?;
     write!(writer, "fmt ")?;
-    write!(writer, "{:4}", 16 as u32)?; // Subchunk1Size (16 for PCM)
-    write!(writer, "{:2}", 1 as u16)?; // AudioFormat (1 for PCM)
+    write!(writer, "{:4}", 16_u32)?; // Subchunk1Size (16 for PCM)
+    write!(writer, "{:2}", 1_u16)?; // AudioFormat (1 for PCM)
     write!(writer, "{:2}", num_channels)?;
     write!(writer, "{:4}", SAMPLE_RATE)?;
     write!(writer, "{:4}", byte_rate)?;

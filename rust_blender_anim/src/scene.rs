@@ -14,6 +14,7 @@ impl Vector3 {
 }
 
 #[derive(Clone, Copy)]
+#[allow(dead_code)]
 pub struct Color {
     pub r: f32,
     pub g: f32,
@@ -27,6 +28,7 @@ impl Color {
     }
 }
 
+#[allow(dead_code)]
 pub struct Object {
     pub name: String,
     pub object_type: String, // "CUBE", "CYLINDER", etc.
@@ -38,6 +40,7 @@ pub struct Object {
     pub keyframes: Vec<Keyframe>,
 }
 
+#[allow(dead_code)]
 pub struct Keyframe {
     pub frame: i32,
     pub location: Option<Vector3>,
@@ -86,7 +89,7 @@ pub fn calculate_walk_cycle(frame: i32, total_frames: i32) -> Vec<Object> {
             location: Vector3::new(x, 0.0, z),
             rotation: Vector3::new(rot_x, 0.0, 0.0),
             scale: Vector3::new(0.15, 0.15, 0.6),
-            color: color,
+            color,
             parent: Some(parent.to_string()),
             keyframes: vec![],
         }

@@ -6,7 +6,6 @@ mod audio;
 mod scene;
 
 // Configuration for our animation
-const NUM_CUBES: i32 = 10;
 const FRAMES: i32 = 60;
 const OUTPUT_FILENAME: &str = "generated_script.py";
 const RENDER_OUTPUT: &str = "//render_output"; // Blender relative path
@@ -78,7 +77,7 @@ for i in range(-20, 20):
             "bpy.ops.mesh.primitive_cube_add(size=1, location=({:.4}, {:.4}, {:.4}))\n",
             obj.location.x, obj.location.y, obj.location.z
         ));
-        script.push_str(&format!("obj = bpy.context.active_object\n"));
+        script.push_str("obj = bpy.context.active_object\n");
         script.push_str(&format!("obj.name = '{}'\n", obj.name));
         script.push_str(&format!("obj.scale = ({:.4}, {:.4}, {:.4})\n", obj.scale.x, obj.scale.y, obj.scale.z));
         script.push_str(&format!("obj.rotation_euler = ({:.4}, {:.4}, {:.4})\n", obj.rotation.x, obj.rotation.y, obj.rotation.z));
