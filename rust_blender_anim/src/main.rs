@@ -232,7 +232,7 @@ bpy.ops.wm.save_as_mainfile(filepath="scene.blend")
         .status()?;
     
     if !status.success() {
-        return Err(std::io::Error::new(std::io::ErrorKind::Other, "Failed to setup scene"));
+        return Err(std::io::Error::other("Failed to setup scene"));
     }
 
     // 5. Parallel Rendering
@@ -279,11 +279,9 @@ bpy.ops.wm.save_as_mainfile(filepath="scene.blend")
             let stdout = cmd.stdout.take().unwrap();
             let reader = BufReader::new(stdout);
 
-            for line in reader.lines() {
-                if let Ok(l) = line {
-                    if l.contains("Append frame") {
-                        pb.inc(1);
-                    }
+            for l in reader.lines().map_while(Result::ok) {
+                if l.contains("Append frame") {
+                    pb.inc(1);
                 }
             }
             
