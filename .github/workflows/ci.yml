@@ -99,13 +99,22 @@ jobs:
         cd rust_blender_anim
         cargo run --release
     
+    - name: Cache rendered video
+      id: video-cache
+      uses: actions/cache@v3
+      with:
+        path: rust_blender_anim/animation_output.mp4
+        key: video-artifact-${{ runner.os }}-${{ hashFiles('rust_blender_anim/generated_script.py') }}
+
     - name: Render video with Blender
+      if: steps.video-cache.outputs.cache-hit != 'true'
       run: |
         cd rust_blender_anim
         export LIBGL_ALWAYS_SOFTWARE=1
         xvfb-run -a ../blender-3.6.15-linux-x64/blender -b -P generated_script.py -noaudio -a
     
     - name: Find and rename output
+      if: steps.video-cache.outputs.cache-hit != 'true'
       run: |
         cd rust_blender_anim
         # Blender may output as render_output0001-0060.mp4 or similar
