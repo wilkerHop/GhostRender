@@ -46,10 +46,10 @@ fi
 
 # Check 5: Test run (dry run - just generate script)
 echo "✓ Testing script generation..."
-if cargo run --quiet 2>&1 | grep -q "Python script generated successfully"; then
+if cargo run --quiet -- --generate-only 2>&1 | grep -q "Python script generated successfully"; then
     echo "  ✅ Script generation works"
-    if [ -f "generated_script.py" ]; then
-        SCRIPT_SIZE=$(wc -c < generated_script.py)
+    if [ -f "setup_scene.py" ]; then
+        SCRIPT_SIZE=$(wc -c < setup_scene.py)
         echo "  ✅ Generated script: $SCRIPT_SIZE bytes"
     fi
 else

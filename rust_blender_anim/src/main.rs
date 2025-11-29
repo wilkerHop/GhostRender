@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Command, Stdio};
-use std::sync::{Arc, Mutex};
 use std::thread;
 use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use serde::Serialize;
@@ -12,7 +11,6 @@ mod scene;
 
 // Configuration
 const FRAMES: i32 = 1800; // 30 seconds at 60 FPS
-const FPS: i32 = 60;
 const CHUNKS: i32 = 4; // Number of parallel render processes
 const OUTPUT_FILENAME: &str = "setup_scene.py";
 const BLEND_FILE: &str = "scene.blend";
@@ -26,7 +24,12 @@ struct ObjAnimData {
     parent: Option<String>,
 }
 
+use std::env;
+
 fn main() -> std::io::Result<()> {
+    let args: Vec<String> = env::args().collect();
+    let generate_only = args.contains(&"--generate-only".to_string());
+
     println!("🚀 Starting Optimized Render Pipeline");
 
     // 1. Generate Audio
@@ -214,6 +217,11 @@ bpy.ops.wm.save_as_mainfile(filepath="scene.blend")
     let mut file = File::create(OUTPUT_FILENAME)?;
     file.write_all(script.as_bytes())?;
 
+    if generate_only {
+        println!("✅ Python script generated successfully.");
+        return Ok(());
+    }
+
     // 4. Run Blender to Setup Scene (Single Thread)
     println!("🏗️  Setting up scene in Blender (creating scene.blend)...");
     let blender_bin = find_blender().expect("Blender not found");
@@ -318,7 +326,7 @@ fn find_blender() -> Option<String> {
 fn concat_videos() -> std::io::Result<()> {
     // Generate a Python script for Blender to concat the videos
     // This is safer than relying on ffmpeg being present
-    let mut script = String::from(r#"
+    let script = String::from(r#"
 import bpy
 import os
 import glob
